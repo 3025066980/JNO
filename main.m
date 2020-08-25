@@ -3,8 +3,8 @@ clear all; close all
 %% parameters
 lr = 0.0001; 
 lambda = 1; %regression
-lambda_1 = 30;    %sparsity
-lambda_2 = 0.6;   % regularizer C
+lambda_1 = 10;    %sparsity
+lambda_2 = 0.7;   % regularizer C
 lambda_3 = 1;     % ridge regularizer W
 net = 8;     %networks
 
@@ -15,7 +15,7 @@ m= 116; %AAL atlas ROIs
 tic;
 
 %load inputs
-foldername = '/home/niharika-shimona/Documents/Projects/Autism_Network/JNO/Data/Praxis/';
+foldername = '/home/niharika-shimona/Documents/Projects/Autism_Network/JNO/Data/SRS/';
 filename = strcat(foldername,'/data.mat');   
 load(filename)
     
