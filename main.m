@@ -3,7 +3,7 @@ clear all; close all
 %% parameters
 lr = 0.0001; 
 lambda = 1; %regression
-lambda_1 = 20;    %sparsity
+lambda_1 = 30;    %sparsity
 lambda_2 = 0.6;   % regularizer C
 lambda_3 = 1;     % ridge regularizer W
 net = 8;     %networks

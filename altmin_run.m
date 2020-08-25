@@ -2,7 +2,7 @@ function [B,C,W,D,lamb] = altmin_run(corr,B_init,C_init,W_init,D_init,Y,lamb_ini
 %%runs alternating minimization with initial solution
 
 %Initilise
-num_iter = 15;
+num_iter = 100;
 B_old = B_init;
 C_old = C_init;
 D_old = D_init;
