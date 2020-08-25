@@ -1,5 +1,5 @@
-function [B_upd,C_upd,K_upd,D_upd,lamb_upd] = altmin_step(corr,B,C,K,D,lamb,Y,lambda,lambda_1,lambda_2,lambda_3,lr,sigma,w_p,p)
-%Given the current values of the iterates, performs a single step of alternating minimisation
+function [B_upd,C_upd,D_upd,W_upd,lamb_upd] = altmin_step(corr,B,C,W,D,lamb,Y,lambda,lambda_1,lambda_2,lambda_3,lr)
+%%Given the current values of the iterates, performs a single step of alternating minimisation
 
 %% B update
 fprintf('Optimise B \n')
@@ -7,27 +7,31 @@ fprintf('Optimise B \n')
 %prox updates
 B_upd = update_basis(B,corr,C,W,D,Y,lamb,lambda,lambda_1,lambda_2,lambda_3);
 
-fprintf(' At final B iteration || Error: %f \n',error_compute(corr,B_upd,C,C,K,Y,D,lamb,lambda,lambda_1,lambda_2,lambda_3,sigma,w_p,p,0))   
+fprintf(' At final B iteration || Error: %f \n',error_compute(corr,B_upd,C,Y,W,D,lamb,lambda,lambda_1,lambda_2,lambda_3))   
 
 %% C update
 
 fprintf('Optimise C \n')
 
 %quad prog solution
-alpha = pinv(K+(lambda_3/lambda)*eye(size(C,2)))*Y; %pre-compute alpha term
-C_upd = coefficient_updates(corr,B_upd,C,Y,D,lamb,alpha,lambda,lambda_2,sigma,w_p,p);
+C_upd = quadprog_C(B_upd,corr,C,W,Y,D,lamb,lambda,lambda_2);
 
-fprintf(' Step C || Error: %f \n',error_compute(corr,B_upd,C_upd,C,K,Y,D,lamb,lambda,lambda_1,lambda_2,lambda_3,sigma,w_p,p,1));
+fprintf(' Step C || Error: %f \n',error_compute(corr,B_upd,C_upd,Y,W,D,lamb,lambda,lambda_1,lambda_2,lambda_3));
 
 
-%% Kernel Update- regression term
+%% W update
 
-K_upd = compute_kernel(C_upd,sigma,w_p,p);
+fprintf('Optimise W \n')
 
-%check rank of matrix
-fprintf(' Rank of Kernel Matrix: %d \n', rank(K_upd))
+%closed form solution for regression weights
 
-fprintf(' Step W-kernel || Error: %f \n',error_compute(corr,B_upd,C_upd,C_upd,K_upd,Y,D,lamb,lambda,lambda_1,lambda_2,lambda_3,sigma,w_p,p,0));
+if  (lambda~=0) %regular
+W_upd = ((C_upd*C_upd')+(lambda_3/lambda)*eye(size(C*C')))\(C_upd*Y);
+else % without regression term
+W_upd = zeros(size(B_upd,2),1);
+end
+
+fprintf(' Step W || Error: %f \n',error_compute(corr,B_upd,C_upd,Y,W_upd,D,lamb,lambda,lambda_1,lambda_2,lambda_3));
 
 %% constraint updates
 
@@ -36,7 +40,7 @@ fprintf('Optimise D and lambda \n')
 %constraint updates
 [D_upd,lamb_upd] = constraint_updates(corr,B_upd,C_upd,lamb,lr);
 
-fprintf(' Step D/lamb || Error: %f \n',error_compute(corr,B_upd,C_upd,C_upd,K_upd,Y,D_upd,lamb_upd,lambda,lambda_1,lambda_2,lambda_3,sigma,w_p,p,0));
+fprintf(' Step D/lamb || Error: %f \n',error_compute(corr,B_upd,C_upd,Y,W_upd,D_upd,lamb_upd,lambda,lambda_1,lambda_2,lambda_3));
        
 end
      
